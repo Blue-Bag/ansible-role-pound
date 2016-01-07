@@ -21,6 +21,7 @@ Control "{{ pound_control_socket }}"
 {% if listenblock.cert is defined and listenblock.cert != None %}
     Cert "{{ listenblock.cert }}"
     Ciphers "{{ pound_ssl_ciphers }}"
+    DisableSSLv2
     DisableSSLv3
     SSLHonorCipherOrder 1
 {% endif %}
