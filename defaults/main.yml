@@ -30,7 +30,7 @@ pound_frontends:
        - name: 'ListenHTTPS'
          address: '127.0.0.1'
          port: '443'
-         cert: ''
+         certs: []
          xHTTP: '1'
          rewriteloc: 0
          headremove: 'X-Forwarded-Proto'

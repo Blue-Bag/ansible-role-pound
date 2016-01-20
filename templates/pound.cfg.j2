@@ -18,8 +18,10 @@ Control "{{ pound_control_socket }}"
     Address {{ listenblock.address }}
     Port {{ listenblock.port }}
     xHTTP {{ listenblock.xHTTP | default(0)}}
-{% if listenblock.cert is defined and listenblock.cert != None %}
-    Cert "{{ listenblock.cert }}"
+{% if listenblock.certs is defined %}
+    {% for crt in listenblock.certs %}
+    Cert "{{ crt.cert }}"
+    {% endfor %}
     Ciphers "{{ pound_ssl_ciphers }}"
     DisableSSLv2
     DisableSSLv3
