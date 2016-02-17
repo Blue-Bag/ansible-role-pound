@@ -5,12 +5,25 @@ Group	"{{ pound_group }}"
 
 #RootJail  "/var/pound"
 
-LogLevel {{ pound_log_level }}
-
 ## check backend every X secs:
 Alive    {{ pound_alive }}
 
+# poundctl control socket
 Control "{{ pound_control_socket }}"
+
+
+## Logging: (goes to syslog by default)
+##  0 no logging
+##  1 normal
+##  2 extended
+##  3 Apache-style (common log format)
+LogLevel {{ pound_log_level }}
+
+
+## use hardware-accelleration card supported by openssl(1):
+#SSLEngine  "<hw>"
+
+TimeOut  {{ pound_timeout }}
 
 
 {% for listenblock in pound_frontends %}
@@ -74,6 +87,9 @@ Service "{{backend.name}}"
     BackEnd
         Address {{ host.ipaddress }}
         Port {{ host.port }}
+        {% if host.timeout is defined %}
+        TimeOut host.timeout
+        {% endif %}
     End
 {% endfor %}
 End
