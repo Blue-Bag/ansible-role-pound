@@ -88,7 +88,7 @@ Service "{{backend.name}}"
         Address {{ host.ipaddress }}
         Port {{ host.port }}
         {% if host.timeout is defined %}
-        TimeOut host.timeout
+        TimeOut {{ host.timeout }}
         {% endif %}
     End
 {% endfor %}
