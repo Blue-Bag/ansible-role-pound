@@ -33,6 +33,8 @@ them are as follows. See the Pound configuration documentation for details:
 	  - [ '127.0.0.1', '8080' ]
 	  - [ '192.168.100.100', '8080']
 
+Pound and rewriting:
+    rewriteloc: 0 - this is critical is you want host based rewrites in Apache to work!!!
 
 Examples
 --------
