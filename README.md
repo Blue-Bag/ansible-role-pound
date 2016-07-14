@@ -3,6 +3,22 @@ Pound
 
 This Ansible role enables users to install and configure the pound reverse proxy, load balancer and HTTPS front-end for Web server(s)
 
+Updated to include the build from source tasks
+
+Changelog:
+
+ - build from source
+ - get from apsis.ch or if that fails get from https://github.com/goochjj/pound/tree/upstream/branch/v2.7
+ - create DH Params (although) not used as compiled with --with-dh=2048 in any case
+
+ ToDo:
+  - consider if we need to set --with-maxbuf=8192 (default = 4096)
+
+
+Apsis - pgp = iEYEABECAAYFAlTGb7kACgkQq3LGKoaR3QJUxwCdFVEZszYnet9a2BWcwkFMzcbP
+frsAn0x07+n1godgsT3UCLBx2Wlu09Eq
+=nTJD
+
 Requirements
 ------------
 

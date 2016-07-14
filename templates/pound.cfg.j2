@@ -22,6 +22,10 @@ LogLevel {{ pound_log_level }}
 
 ## use hardware-accelleration card supported by openssl(1):
 #SSLEngine  "<hw>"
+# {% if pound_version == 2.7 %}
+# DHParams "{{ build_workspace }}/dhparams.pem"
+# {% endif %}
+
 
 TimeOut  {{ pound_timeout }}
 

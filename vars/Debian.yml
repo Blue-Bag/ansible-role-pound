@@ -2,6 +2,18 @@
 pound_pkgs:
   - pound
 
+pound_build_pkgs:
+  - make
+  - gcc
+  - libssl-dev
+
+# when building only
+pound_version: '2.7'
+
+build_workspace: '/etc/pound'
+
+pound_install_path: '/usr'
+
 pound_svc_name: pound
 
 pound_cfg_file: /etc/pound/pound.cfg
@@ -11,3 +23,6 @@ pound_control_socket: /var/run/pound/poundctl.socket
 pound_user: www-data
 
 pound_group: www-data
+
+
+build_supported_os_family: True

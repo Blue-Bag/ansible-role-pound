@@ -1,5 +1,7 @@
 ---
 
+pound_install_from_source: false
+pound_install_from_source_cleanup: true
 
 # What level to log at
 ## Logging: (goes to syslog by default)
