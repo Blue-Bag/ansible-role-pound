@@ -5,6 +5,8 @@ pound_pkgs:
 
 pound_svc_name: pound
 
+pound_version: '2.7'
+
 pound_cfg_file: /etc/pound.cfg
 
 pound_control_socket: /var/lib/pound/pound.cfg
@@ -12,3 +14,6 @@ pound_control_socket: /var/lib/pound/pound.cfg
 pound_user: pound
 
 pound_group: pound
+
+
+build_supported_os_family: False
