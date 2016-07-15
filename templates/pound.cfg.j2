@@ -40,8 +40,13 @@ TimeOut  {{ pound_timeout }}
     Cert "{{ crt.cert }}"
     {% endfor %}
     Ciphers "{{ pound_ssl_ciphers }}"
+{% if pound_version == '2.7' %}
+    Disable SSLv2
+    Disable SSLv3
+{% else %}
     DisableSSLv2
     DisableSSLv3
+{% endif %}
     SSLHonorCipherOrder 1
 {% endif %}
 {% if listenblock.rewriteloc is defined and listenblock.rewriteloc != None %}
