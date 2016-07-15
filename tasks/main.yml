@@ -2,6 +2,7 @@
 
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
+  tags: [always]
 
 # Install git from source when git_install_from_source is true.
 - include: install-from-source.yml
@@ -19,6 +20,12 @@
     backup: yes
   notify:
    - restart pound
+
+
+- include: configure-logging.yml
+  when: pound_custom_log == true and ansible_os_family == "Debian"
+  tags: [pound_log]
+
 
 - name: Configure pound to start in /etc/default/pound
   lineinfile:

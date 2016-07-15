@@ -19,6 +19,10 @@ Control "{{ pound_control_socket }}"
 ##  3 Apache-style (common log format)
 LogLevel {{ pound_log_level }}
 
+{% if pound_custom_log %}
+LogFacility local0
+{% endif %}
+
 
 ## use hardware-accelleration card supported by openssl(1):
 #SSLEngine  "<hw>"

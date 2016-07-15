@@ -1,0 +1,59 @@
+---
+
+- name: Pound | create log directory
+  file:
+    path: "{{ pound_log_dir }}"
+    state: directory
+    owner: "{{ pound_user }}"
+    group: "adm"
+    mode: "0755"
+    recurse: true
+  become: true
+
+- name: Pound | Check for pound log
+  stat:
+    path: "{{ pound_log_file }}"
+  become: true
+  register: stat_pound_log
+  when: pound_custom_log == True
+
+- name: Pound | Touch pound log - needs to exist
+  file:
+    path: "{{ pound_log_file }}"
+    state: touch
+    owner: "{{ pound_user }}"
+    group: adm
+    mode: 0640
+  become: true
+  when: pound_custom_log == True and stat_pound_log.stat.exists == false
+
+
+- name: Copy the pound.cfg rsyslog template file
+  template:
+    src: rsyslog-pound.conf.j2
+    dest: "{{ pound_rsyslog_file }}"
+    backup: no
+  become: true
+  notify:
+   - restart pound
+  when: pound_custom_log
+
+- name: Replace syslog entry for Local0
+  lineinfile:
+     dest: /etc/rsyslog.conf
+     regexp: "^(.*)/var/log/syslog"
+     line: "*.*;auth,authpriv.none,local0.none  -/var/log/syslog"
+     state: present
+     backrefs: true
+     backup: yes
+  become: true
+  when: pound_custom_log
+
+- name: Create logrotate entry for pound.log
+  template:
+    src: logrotate-pound.j2
+    dest: "/etc/logrotate.d/pound"
+    owner: root
+    group: root
+    mode: 0644
+  become: true

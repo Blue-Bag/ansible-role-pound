@@ -11,6 +11,16 @@ pound_install_from_source_cleanup: true
 ##  3 Apache-style (common log format)
 pound_log_level: 1
 
+pound_custom_log: True
+
+pound_log_dir: "/var/log/pound"
+
+pound_log_file: "/var/log/pound/pound.log"
+
+pound_logfile_rotate_number: 7
+pound_logfile_rotate_period: 'daily'
+pound_rsyslog_file: "/etc/rsyslog.d/pound.conf"
+
 ## check backend every X secs:
 pound_alive: 30
 
