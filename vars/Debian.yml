@@ -18,6 +18,7 @@ pound_svc_name: pound
 
 pound_syslogd_name: rsyslog
 
+
 pound_cfg_file: /etc/pound/pound.cfg
 
 pound_control_socket: /var/run/pound/poundctl.socket

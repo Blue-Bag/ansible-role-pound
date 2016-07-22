@@ -89,3 +89,5 @@ Thanks
 ------
 
 This was based on the [NTP module](https://github.com/bennojoy/ntp).
+ref:
+Pound logging - https://blog.bandinelli.net/index.php?post/2013/10/16/Enregistrer-les-logs-de-Pound-avec-rsyslog-et-logrorate
