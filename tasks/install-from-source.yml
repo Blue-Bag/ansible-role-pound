@@ -6,6 +6,7 @@
   when: build_supported_os_family|default(False) == False
   tags: [pound_build]
 
+
 - name: Stop pound
   service: name={{ pound_svc_name }} state=stopped enabled=yes
 
@@ -17,7 +18,6 @@
   with_items: "{{pound_pkgs}}"
   environment: "{{env}}"
   when: ansible_os_family == 'Debian'
-
 
 # - name: Change the location of the config file
 #   set_fact:
