@@ -52,12 +52,17 @@ pound_frontends:
          certs: []
          xHTTP: '1'
          rewriteloc: 0
-         headremove: 'X-Forwarded-Proto'
-         headadd: 'X-Forwarded-Proto: https'
+         headremove:
+           - 'Proxy'
+           - 'X-Forwarded-Proto'
+         headadd:
+           - 'X-Forwarded-Proto: https'
        - name: 'ListenHTTP'
          address: '127.0.0.1'
          port: '80'
-         headremove: 'X-Forwarded-Proto'
+         headremove:
+           -  'Proxy'
+           -  'X-Forwarded-Proto'
          headadd: 'X-Forwarded-Proto: http'
          service:
            - name: redirect

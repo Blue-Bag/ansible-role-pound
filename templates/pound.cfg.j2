@@ -54,13 +54,17 @@ TimeOut  {{ pound_timeout }}
     SSLHonorCipherOrder 1
 {% endif %}
 {% if listenblock.rewriteloc is defined and listenblock.rewriteloc != None %}
-   RewriteLocation {{ listenblock.rewriteloc | default(0)}}
+    RewriteLocation {{ listenblock.rewriteloc | default(0)}}
 {% endif %}
 {% if listenblock.headremove is defined  and listenblock.headremove != None %}
-    HeadRemove "{{ listenblock.headremove }}"
+{% for delheader in listenblock.headremove %}
+    HeadRemove "{{ delheader }}"
+{% endfor %}
 {% endif %}
 {% if listenblock.headadd  is defined and listenblock.headadd != None %}
-    AddHeader "{{ listenblock.headadd }}"
+{% for addheader in listenblock.headadd %}
+    AddHeader "{{ addheader }}"
+{% endfor %}
 {% endif %}
 {% if listenblock.service is defined %}
 {% for service in listenblock.service %}
