@@ -60,6 +60,7 @@ pound_frontends:
        - name: 'ListenHTTP'
          address: '127.0.0.1'
          port: '80'
+         rewriteloc: 0
          headremove:
            -  'Proxy'
            -  'X-Forwarded-Proto'
