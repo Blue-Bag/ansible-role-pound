@@ -52,6 +52,7 @@
     backup: yes
   notify:
    - restart pound
+  tags: [pound_cfg]
 
 
 - include: configure-logging.yml
