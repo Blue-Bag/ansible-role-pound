@@ -68,21 +68,21 @@ TimeOut  {{ pound_timeout }}
 {% endif %}
 {% if listenblock.service is defined %}
 {% for service in listenblock.service %}
-      Service
+    Service
 {% if service.backend is defined %}
-         BackEnd
-             Address {{ service.backend }}
-             Port {{ service.port }}
-         End
+      BackEnd
+        Address {{ service.backend }}
+        Port {{ service.port }}
+      End
 {% endif %}
 {% if service.headrequire is defined %}
-        HeadRequire "{{ service.headrequire }}"
+      HeadRequire "{{ service.headrequire }}"
 {% endif %}
 {# note on later version use RedirectAppend #}
 {% if service.redirect is defined %}
-        Redirect "{{ service.redirect }}"
+      Redirect {{ service.redirect.status | default('301')}} "{{ service.redirect.target }}"
 {% endif %}
-      End
+    End
 {% endfor %}
 {% endif %}
    Err414 "{{pound_error_page}}"
