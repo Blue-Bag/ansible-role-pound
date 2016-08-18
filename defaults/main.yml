@@ -64,11 +64,14 @@ pound_frontends:
          headremove:
            -  'Proxy'
            -  'X-Forwarded-Proto'
-         headadd: 'X-Forwarded-Proto: http'
+         headadd:
+           - 'X-Forwarded-Proto: http'
          service:
-           - name: redirect
-             redirect: "https://localhost/"
-
+           - name: redirect de
+             headrequire: "Host: .*www.example.com.*"
+             redirect:
+               target: "http://www.example2.com"
+               status: 301
 
 pound_backends:
         - name: default
