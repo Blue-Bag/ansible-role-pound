@@ -44,6 +44,23 @@
 - include: install-package.yml
   when: pound_install_from_source == false
 
+- block:
+    - name: Get installed version of Pound.
+      command: "{{ pound_svc_name }} -V"
+      changed_when: false
+      register: _pound_version
+    - name: get installed version
+      set_fact:
+         _pound_installed_version: "{{ _pound_version.stdout.split('/n')[0].split(' ')[1].replace('\n', '') }}"
+    # - debug: msg="{{ _pound_installed_version }}"
+    - debug: msg="Pound version {{ pound_version }} installed {{ _pound_installed }} -  {{ _pound_installed_version }}"
+  rescue:
+    - name: set default fact
+      set_fact:
+         _pound_installed: false
+    - debug: msg='Pound not installed'
+  always_run: yes
+  become: true
 
 - name: Copy the pound.cfg template file
   template:

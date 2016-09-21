@@ -26,7 +26,7 @@ LogFacility local0
 
 ## use hardware-accelleration card supported by openssl(1):
 #SSLEngine  "<hw>"
-# {% if pound_version == 2.7 %}
+# {% if _pound_installed_version == 2.7 %}
 # DHParams "{{ build_workspace }}/dhparams.pem"
 # {% endif %}
 
@@ -44,7 +44,7 @@ TimeOut  {{ pound_timeout }}
     Cert "{{ crt.cert }}"
     {% endfor %}
     Ciphers "{{ pound_ssl_ciphers }}"
-{% if pound_version == '2.7' %}
+{% if _pound_installed_version == '2.7' %}
     Disable SSLv2
     Disable SSLv3
 {% else %}
