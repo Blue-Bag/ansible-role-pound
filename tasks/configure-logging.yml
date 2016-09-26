@@ -46,6 +46,8 @@
      state: present
      backrefs: true
      backup: yes
+  notify:
+    - restart rsyslog
   become: true
   when: pound_custom_log
 
