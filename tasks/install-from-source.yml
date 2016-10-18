@@ -9,6 +9,7 @@
 
 - name: Stop pound
   service: name={{ pound_svc_name }} state=stopped enabled=yes
+  when: _pound_installed
 
 - name: Uninstall the required packages in Debian derivatives
   apt:
@@ -57,7 +58,7 @@
     state: installed
     update_cache: yes
   with_items: "{{pound_build_pkgs}}"
-  environment: env
+  environment: "{{env}}"
   when: ansible_os_family == 'Debian'
   become: true
   tags: [pound_build]
@@ -143,6 +144,17 @@
   template:
     src: pound-init-d.j2
     dest: "/etc/init.d/pound"
+    backup: no
+    mode: 0755
+  become: yes
+  notify:
+   - restart pound
+  tags: [pound_build]
+
+- name: Copy the startup file
+  template:
+    src: pound-etc-default.j2
+    dest: "/etc/default/pound"
     backup: no
   become: yes
   notify:
