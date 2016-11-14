@@ -140,33 +140,63 @@
   tags: [pound_build]
 
 
-- name: Copy the init.d template file
+- name: Pound | create the run dir
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+    recurse: true
+  become: true
+  with_items:
+    - {
+        path: "/etc/default/pound",
+        owner: "root",
+        group: "root",
+        mode: "0750"
+    }
+  tags: [pound_build]
+
+
+- name: Copy the init.d/startup template files
   template:
-    src: pound-init-d.j2
-    dest: "/etc/init.d/pound"
-    backup: no
-    mode: 0755
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: "{{ item.backup | default('no') }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
   become: yes
+  with_items:
+    - {
+        src: "pound-init-d.j2",
+        dest: "/etc/init.d/pound",
+        owner: "root",
+        group: "root",
+        mode: "0755",
+        backup: "no"
+    }
+    - {
+        src: "pound-etc-default.j2",
+        dest: "/etc/default/pound",
+        owner: "root",
+        group: "root",
+        mode: "0755",
+        backup: "no"
+    }
   notify:
    - restart pound
   tags: [pound_build]
 
-- name: Copy the startup file
-  template:
-    src: pound-etc-default.j2
-    dest: "/etc/default/pound"
-    backup: no
-  become: yes
-  notify:
-   - restart pound
-  tags: [pound_build]
+
 
 - name: Clean up archive
   file:
     path: "{{ item }}"
     state: absent
   with_items:
-    - "{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+    - "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
     - "{{ build_workspace }}/Pound-{{ pound_version }}"
   when: pound_install_from_source_cleanup
   become: yes
