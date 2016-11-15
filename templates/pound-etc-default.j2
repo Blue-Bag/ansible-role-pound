@@ -4,4 +4,4 @@
 
 # prevent startup with default configuration
 # set the below varible to 1 in order to allow pound to start
-startup={% 1 if pound_start_onboot else 0 %}
+startup={{ 1 if pound_start_onboot else 0 }}
