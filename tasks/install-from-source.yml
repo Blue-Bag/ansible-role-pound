@@ -140,24 +140,6 @@
   tags: [pound_build]
 
 
-- name: Pound | create the run dir
-  file:
-    path: "{{ item.path }}"
-    state: directory
-    owner: "{{ item.owner }}"
-    group: "{{ item.group }}"
-    mode: "{{ item.mode }}"
-    recurse: true
-  become: true
-  with_items:
-    - {
-        path: "/etc/default/pound",
-        owner: "root",
-        group: "root",
-        mode: "0750"
-    }
-  tags: [pound_build]
-
 
 - name: Copy the init.d/startup template files
   template:
