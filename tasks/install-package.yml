@@ -19,3 +19,11 @@
   environment: "{{env}}"
   when: ansible_os_family == 'Debian'
 
+- name: Configure pound to start in /etc/default/pound
+  lineinfile:
+    dest: "/etc/default/pound"
+    regexp: "^startup="
+    line: "startup={{ 1 if pound_start_onboot else 0 }}"
+  notify:
+   - restart pound
+  when: ansible_os_family == 'Debian'
