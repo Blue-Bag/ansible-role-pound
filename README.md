@@ -19,6 +19,12 @@ Apsis - pgp = iEYEABECAAYFAlTGb7kACgkQq3LGKoaR3QJUxwCdFVEZszYnet9a2BWcwkFMzcbP
 frsAn0x07+n1godgsT3UCLBx2Wlu09Eq
 =nTJD
 
+https://github.com/goochjj/pound/archive/upstream/branch/v2.7.zip
+
+https://api.github.com/repos/goochjj/pound/tarball/v2.7
+
+https://codeload.github.com/goochjj/pound/upstream.tar.gz/v2.7
+
 Requirements
 ------------
 
@@ -91,3 +97,4 @@ Thanks
 This was based on the [NTP module](https://github.com/bennojoy/ntp).
 ref:
 Pound logging - https://blog.bandinelli.net/index.php?post/2013/10/16/Enregistrer-les-logs-de-Pound-avec-rsyslog-et-logrorate
+
