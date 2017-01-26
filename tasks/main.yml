@@ -2,27 +2,78 @@
 
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
+  tags: [always]
 
-- name: Install the required  packages in Redhat derivatives
-  yum: name={{ item }} state=installed
-  with_items: pound_pkgs
-  when: ansible_os_family == 'RedHat'
 
-- name: Install the required packages in Debian derivatives
-  apt: name={{ item }} state=installed update_cache=yes
-  with_items: pound_pkgs
-  environment: env
-  when: ansible_os_family == 'Debian'
+  #  This block will check the installed version of Pound
+  #  It is required to save us from rebuildubg Pound from source
+  #  if the installed verson is the same as the requested version
+  #  We may extend to allow a force rebuild option.
+
+- block:
+    - name: Create default
+      set_fact:
+        _pound_installed: false
+    - name: Get installed version of Pound.
+      command: "{{ pound_svc_name }} -V"
+      changed_when: false
+      register: _pound_version
+    - name: get installed version
+      set_fact:
+         _pound_installed_version: "{{ _pound_version.stdout.split('/n')[0].split(' ')[1].replace('\n', '') }}"
+    # - debug: msg="{{ _pound_installed_version }}"
+    - name: Check pound version.
+      set_fact:
+        _pound_installed: true
+      when: _pound_installed_version == '{{ pound_version }}'
+    - debug: msg="Pound version {{ pound_version }} installed {{ _pound_installed }} -  {{ _pound_installed_version }}"
+  rescue:
+    - name: set default fact
+      set_fact:
+         _pound_installed: false
+    - debug: msg='Pound not installed'
+  always_run: yes
+  become: true
+
+# Install pound from source when pound_install_from_source is true and pound version not installed.
+- include: install-from-source.yml
+  when: pound_install_from_source == true and not _pound_installed
+  tags: [pound_build]
+
+# Install pound from package when pound_install_from_source is false.
+- include: install-package.yml
+  when: pound_install_from_source == false
+
+- block:
+    - name: Get installed version of Pound.
+      command: "{{ pound_svc_name }} -V"
+      changed_when: false
+      register: _pound_version
+    - name: get installed version
+      set_fact:
+         _pound_installed_version: "{{ _pound_version.stdout.split('/n')[0].split(' ')[1].replace('\n', '') }}"
+    # - debug: msg="{{ _pound_installed_version }}"
+    - debug: msg="Pound version {{ pound_version }} installed {{ _pound_installed }} -  {{ _pound_installed_version }}"
+  rescue:
+    - name: set default fact
+      set_fact:
+         _pound_installed: false
+    - debug: msg='Pound not installed'
+  always_run: yes
+  become: true
 
 - name: Copy the pound.cfg template file
-  template: src=pound.cfg.j2 dest={{ pound_cfg_file }}
-  notify: 
+  template:
+    src: pound.cfg.j2
+    dest: "{{ pound_cfg_file }}"
+    backup: yes
+  notify:
    - restart pound
+  tags: [pound_cfg]
 
-- name: Configure pound to start in /etc/default/pound
-  lineinfile: dest=/etc/default/pound regexp=^startup= line=startup=1
-  notify: 
-   - restart pound
-  when: ansible_os_family == 'Debian'
 
- 
+- include: configure-logging.yml
+  when: pound_custom_log == true and ansible_os_family == "Debian"
+  tags: [pound_log]
+
+

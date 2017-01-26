@@ -3,20 +3,112 @@
 User	"{{ pound_user }}"
 Group	"{{ pound_group }}"
 
-LogLevel {{ pound_log_level }}
+#RootJail  "/var/pound"
 
+## check backend every X secs:
+Alive    {{ pound_alive }}
+
+# poundctl control socket
 Control "{{ pound_control_socket }}"
 
-ListenHTTP
-  Address {{ pound_listen_http_address }}
-  Port	{{ pound_listen_http_port }}
 
-  Service
-    BackEnd
-		  {% for server in pound_backend_servers %}
-      Address	{{ server[0] }}
-      Port	{{ server[1] }}
-			{% endfor %} 
+## Logging: (goes to syslog by default)
+##  0 no logging
+##  1 normal
+##  2 extended
+##  3 Apache-style (common log format)
+LogLevel {{ pound_log_level }}
+
+{% if pound_custom_log %}
+LogFacility local0
+{% endif %}
+
+
+## use hardware-accelleration card supported by openssl(1):
+#SSLEngine  "<hw>"
+# {% if _pound_installed_version == 2.7 %}
+# DHParams "{{ build_workspace }}/dhparams.pem"
+# {% endif %}
+
+
+TimeOut  {{ pound_timeout }}
+
+
+{% for listenblock in pound_frontends %}
+{{ listenblock.name }}
+    Address {{ listenblock.address }}
+    Port {{ listenblock.port }}
+    xHTTP {{ listenblock.xHTTP | default(0)}}
+{% if listenblock.certs is defined %}
+    {% for crt in listenblock.certs %}
+    Cert "{{ crt.cert }}"
+    {% endfor %}
+    Ciphers "{{ pound_ssl_ciphers }}"
+{% if _pound_installed_version == '2.7' %}
+    Disable SSLv2
+    Disable SSLv3
+{% else %}
+    DisableSSLv2
+    DisableSSLv3
+{% endif %}
+    SSLHonorCipherOrder 1
+{% endif %}
+{% if listenblock.rewriteloc is defined and listenblock.rewriteloc != None %}
+    RewriteLocation {{ listenblock.rewriteloc | default(0)}}
+{% endif %}
+{% if listenblock.headremove is defined  and listenblock.headremove != None %}
+{% for delheader in listenblock.headremove %}
+    HeadRemove "{{ delheader }}"
+{% endfor %}
+{% endif %}
+{% if listenblock.headadd  is defined and listenblock.headadd != None %}
+{% for addheader in listenblock.headadd %}
+    AddHeader "{{ addheader }}"
+{% endfor %}
+{% endif %}
+{% if listenblock.service is defined %}
+{% for service in listenblock.service %}
+    Service
+{% if service.backend is defined %}
+      BackEnd
+        Address {{ service.backend }}
+        Port {{ service.port }}
+      End
+{% endif %}
+{% if service.headrequire is defined %}
+      HeadRequire "{{ service.headrequire }}"
+{% endif %}
+{# note on later version use RedirectAppend #}
+{% if service.redirect is defined %}
+      Redirect {{ service.redirect.status | default('301')}} "{{ service.redirect.target }}"
+{% endif %}
     End
-  End
+{% endfor %}
+{% endif %}
+   Err414 "{{pound_error_page}}"
+   Err500 "{{pound_error_page}}"
+   Err501 "{{pound_error_page}}"
+   Err503 "{{pound_error_page}}"
 End
+{% endfor %}
+
+{% for backend in pound_backends %}
+Service "{{backend.name}}"
+{% if backend.hostname is defined and backend.hostname != '' %}
+    HeadRequire "Host:{{ backend.hostname }}"
+{% endif %}
+{% if backend.url is defined and backend.url != '' %}
+    URL "{{ backend.url }}"
+{% endif %}
+{% for host in backend.hosts %}
+    BackEnd
+        Address {{ host.ipaddress }}
+        Port {{ host.port }}
+        {% if host.timeout is defined %}
+        TimeOut {{ host.timeout }}
+        {% endif %}
+    End
+{% endfor %}
+End
+{% endfor %}
+

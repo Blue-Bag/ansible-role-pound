@@ -1,18 +1,92 @@
 ---
 
-pound_svc_name: pound
+pound_install_from_source: false
+pound_install_from_source_cleanup: true
+
+pound_start_onboot: yes
 
 # What level to log at
+## Logging: (goes to syslog by default)
+##  0 no logging
+##  1 normal
+##  2 extended
+##  3 Apache-style (common log format)
 pound_log_level: 1
 
+pound_custom_log: True
+
+pound_log_dir: "/var/log/pound"
+
+pound_log_file: "/var/log/pound/pound.log"
+
+pound_logfile_rotate_number: 7
+pound_logfile_rotate_period: 'daily'
+pound_rsyslog_file: "/etc/rsyslog.d/pound.conf"
+
+## check backend every X secs:
+pound_alive: 30
+
+pound_timeout: 15
+
 # What ip address should pound listen on?
-pound_listen_http_address: 127.0.0.1
+pound_listen_http_address: '127.0.0.1'
 
 # What port should pound listen on?
-pound_listen_http_port: 80
+pound_listen_http_port: '80'
+pound_internal_web: '8080'
+pound_internal_address: '127.0.0.1'
 
 # What ip will pound be proxying traffic to?
 # - add more by adding additional items in the form ['ip', 'port']
-pound_backend_servers: 
+pound_backend_servers:
   - [ '127.0.0.1', '8080' ]
 #  - [ '192.168.100.100', '8080']
+
+pound_error_page: "/var/www/default/index.html"
+
+pound_ssl_ciphers: "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5"
+
+#pound_ssl_ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA"
+pound_frontends:
+       - name: 'ListenHTTPS'
+         address: '127.0.0.1'
+         port: '443'
+         certs: []
+         xHTTP: '1'
+         rewriteloc: 0
+         headremove:
+           - 'Proxy'
+           - 'X-Forwarded-Proto'
+         headadd:
+           - 'X-Forwarded-Proto: https'
+       - name: 'ListenHTTP'
+         address: '127.0.0.1'
+         port: '80'
+         rewriteloc: 0
+         headremove:
+           -  'Proxy'
+           -  'X-Forwarded-Proto'
+         headadd:
+           - 'X-Forwarded-Proto: http'
+         service:
+           - name: redirect de
+             headrequire: "Host: .*www.example.com.*"
+             redirect:
+               target: "http://www.example2.com"
+               status: 301
+
+pound_backends:
+        - name: default
+          hostname: '.*example.com\..*'
+          hosts:
+            - "{{pound_internal_address}}"
+
+    # Session
+    #     Type Cookie
+    # END
+    # Emergency
+    #     Address localhost
+    #     Port {{ pound_internal_web }}
+    # End
+
+

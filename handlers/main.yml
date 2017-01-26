@@ -3,3 +3,6 @@
 - name: restart pound
   service: name={{ pound_svc_name }} state=restarted enabled=yes
 
+- name: restart rsyslog
+  service: name={{ pound_syslogd_name }} state=restarted enabled=yes
+

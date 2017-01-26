@@ -1,0 +1,9 @@
+{{ pound_log_file }} {
+        missingok
+        rotate {{ pound_logfile_rotate_number | default(7) }}
+        {{ pound_logfile_rotate_period | default('daily') }}
+        compress
+        copytruncate
+        notifempty
+        create 640 root root
+}

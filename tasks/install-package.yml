@@ -1,0 +1,29 @@
+---
+
+# Install from package
+
+
+- name: Install the required  packages in Redhat derivatives
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{pound_pkgs}}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Install the required packages in Debian derivatives
+  apt:
+    name: "{{ item }}"
+    state: installed
+    update_cache: yes
+  with_items: "{{pound_pkgs}}"
+  environment: "{{env}}"
+  when: ansible_os_family == 'Debian'
+
+- name: Configure pound to start in /etc/default/pound
+  lineinfile:
+    dest: "/etc/default/pound"
+    regexp: "^startup="
+    line: "startup={{ 1 if pound_start_onboot else 0 }}"
+  notify:
+   - restart pound
+  when: ansible_os_family == 'Debian'

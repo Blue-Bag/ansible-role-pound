@@ -1,0 +1,185 @@
+---
+
+- name: Default | Check for unsupported target operating system
+  fail:
+    msg: "The operating system of the target machine ({{ inventory_hostname }}) is not currently supported"
+  when: build_supported_os_family|default(False) == False
+  tags: [pound_build]
+
+
+- name: Stop pound
+  service: name={{ pound_svc_name }} state=stopped enabled=yes
+  when: _pound_installed
+
+- name: Uninstall the required packages in Debian derivatives
+  apt:
+    name: "{{ item }}"
+    state: absent
+    update_cache: yes
+  with_items: "{{pound_pkgs}}"
+  environment: "{{env}}"
+  when: ansible_os_family == 'Debian'
+
+# - name: Change the location of the config file
+#   set_fact:
+#      pound_cfg_file: '/usr/etc/pound.cfg'
+#   tags: [pound_build]
+
+- name: Pound | Setup the build dir
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+    recurse: true
+  become: true
+  with_items:
+    - {
+        path: "{{build_workspace}}",
+        owner: "root",
+        group: "root",
+        mode: "0750"
+    }
+  tags: [pound_build]
+
+- name: Create the DH Params
+  command: >
+    openssl dhparam -out {{build_workspace}}/dhparams.pem {{ pound_dh_params_size }}
+    creates="{{build_workspace}}/dhparams.pem"
+  become: yes
+  tags: [pound_build]
+
+
+
+- name: Install the required build packages
+  apt:
+    name: "{{ item }}"
+    state: installed
+    update_cache: yes
+  with_items: "{{pound_build_pkgs}}"
+  environment: "{{env}}"
+  when: ansible_os_family == 'Debian'
+  become: true
+  tags: [pound_build]
+
+
+# - name: Download Pound.
+#   get_url:
+#     url: "http://www.apsis.ch/pound/Pound-{{ pound_version }}.tgz"
+#     dest: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+#   become: true
+#   tags: [pound_build]
+
+- block:
+    - name: Download Pound from source.
+      get_url:
+        url: "http://www.apsis.ch/pound/Pound-{{ pound_version }}.tgz"
+        dest: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+    - name: Expand pound archive.
+      unarchive:
+        src: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+        dest: "{{ build_workspace }}"
+        creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
+        copy: no
+  rescue:
+    - name: Manual | Get pound from github
+      git:
+        repo: "https://github.com/goochjj/pound.git"
+        dest: "{{ build_workspace }}/Pound-{{ pound_version }}"
+        version: "upstream/branch/v2.7"
+        accept_hostkey: "yes"
+        force: no
+        update: no
+        depth: 1
+    - debug: msg='Pound downloaded from Github'
+  become: true
+  tags: [pound_build]
+
+    # - name: Download Pound from github.
+    #   get_url:
+    #     url: "https://github.com/goochjj/pound/archive/upstream/branch/v{{ pound_version }}.zip"
+    #     dest: "{{ build_workspace }}/Pound-{{ pound_version }}.zip"
+    # - name: Expand pound archive.
+    #   unarchive:
+    #     src: "{{ build_workspace }}/Pound-{{ pound_version }}.zip"
+    #     dest: "{{ build_workspace }}"
+    #     creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
+    #     copy: no
+# - name: Expand pound archive.
+#   unarchive:
+#     src: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+#     dest: "{{ build_workspace }}"
+#     creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
+#     copy: no
+#   become: true
+#   tags: [pound_build]
+
+- name: Configure pound make
+  command: >
+     ./configure --with-dh={{ pound_dh_params_size }} --with-maxbuf={{ pound_max_buffers }}
+     chdir={{ build_workspace }}/Pound-{{ pound_version }}
+  become: yes
+  tags: [pound_build]
+
+- name: Clean build for Pound.
+  command: >
+    make clean
+    chdir={{ build_workspace }}/Pound-{{ pound_version }}
+  become: yes
+  tags: [pound_build]
+
+- name: Build Pound.
+  command: >
+    make prefix={{ pound_install_path }} {{ item }}
+    chdir={{ build_workspace }}/Pound-{{ pound_version }}
+  with_items:
+    - all
+    - install
+  become: yes
+  tags: [pound_build]
+
+
+
+- name: Copy the init.d/startup template files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: "{{ item.backup | default('no') }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  become: yes
+  with_items:
+    - {
+        src: "pound-init-d.j2",
+        dest: "/etc/init.d/pound",
+        owner: "root",
+        group: "root",
+        mode: "0755",
+        backup: "no"
+    }
+    - {
+        src: "pound-etc-default.j2",
+        dest: "/etc/default/pound",
+        owner: "root",
+        group: "root",
+        mode: "0755",
+        backup: "no"
+    }
+  notify:
+   - restart pound
+  tags: [pound_build]
+
+
+
+- name: Clean up archive
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+    - "{{ build_workspace }}/Pound-{{ pound_version }}"
+  when: pound_install_from_source_cleanup
+  become: yes
+  tags: [pound_build]

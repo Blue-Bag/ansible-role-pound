@@ -1,4 +1,10 @@
 ---
+# don't start on install
 env:
  RUNLEVEL: 1
 
+build_git_repo:  'https://github.com/goochjj/pound/archive/upstream/branch/v2.7.zip'
+
+pound_dh_params_size: 2048
+# default max buffers  4096
+pound_max_buffers: 8192
