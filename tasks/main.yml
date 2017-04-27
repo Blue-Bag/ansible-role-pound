@@ -32,7 +32,7 @@
       set_fact:
          _pound_installed: false
     - debug: msg='Pound not installed'
-  always_run: yes
+  check_mode: no
   become: true
 
 # Install pound from source when pound_install_from_source is true and pound version not installed.
@@ -59,7 +59,7 @@
       set_fact:
          _pound_installed: false
     - debug: msg='Pound not installed'
-  always_run: yes
+  check_mode: no
   become: true
 
 - name: Copy the pound.cfg template file
