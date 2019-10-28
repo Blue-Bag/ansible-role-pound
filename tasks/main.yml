@@ -25,7 +25,7 @@
     - name: Check pound version.
       set_fact:
         _pound_installed: true
-      when: _pound_installed_version == '{{ pound_version }}'
+      when: _pound_installed_version == pound_version
     - debug: msg="Pound version {{ pound_version }} installed {{ _pound_installed }} -  {{ _pound_installed_version }}"
   rescue:
     - name: set default fact

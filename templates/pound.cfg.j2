@@ -47,6 +47,7 @@ TimeOut  {{ pound_timeout }}
 {% if _pound_installed_version == '2.7' %}
     Disable SSLv2
     Disable SSLv3
+    Disable TLSv1_1
 {% else %}
     DisableSSLv2
     DisableSSLv3
@@ -111,4 +112,3 @@ Service "{{backend.name}}"
 {% endfor %}
 End
 {% endfor %}
-
