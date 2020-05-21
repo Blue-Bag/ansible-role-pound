@@ -67,7 +67,7 @@ pound_frontends:
          port: '80'
          rewriteloc: 0
          headremove:
-           -  'Proxy'
+           -  '^Proxy:'
            -  'X-Forwarded-Proto'
          headadd:
            - 'X-Forwarded-Proto: http'
