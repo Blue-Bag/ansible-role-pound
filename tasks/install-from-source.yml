@@ -10,6 +10,7 @@
 - name: Stop pound
   service: name={{ pound_svc_name }} state=stopped enabled=yes
   when: _pound_installed
+  tags: [pound_build]
 
 - name: Uninstall the required packages in Debian derivatives
   apt:
@@ -19,7 +20,7 @@
   with_items: "{{pound_pkgs}}"
   environment: "{{env}}"
   when: ansible_os_family == 'Debian'
-
+  tags: [pound_build]
 # - name: Change the location of the config file
 #   set_fact:
 #      pound_cfg_file: '/usr/etc/pound.cfg'
