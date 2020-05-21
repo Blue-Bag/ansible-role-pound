@@ -56,7 +56,7 @@
 - name: Install the required build packages
   apt:
     name: "{{ item }}"
-    state: installed
+    state: present
     update_cache: yes
   with_items: "{{pound_build_pkgs}}"
   environment: "{{env}}"
