@@ -19,7 +19,7 @@
     update_cache: yes
   with_items: "{{pound_pkgs}}"
   environment: "{{env}}"
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: [pound_build]
 # - name: Change the location of the config file
 #   set_fact:
@@ -60,7 +60,7 @@
     update_cache: yes
   with_items: "{{pound_build_pkgs}}"
   environment: "{{env}}"
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   become: true
   tags: [pound_build]
 
