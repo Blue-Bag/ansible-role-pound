@@ -10,6 +10,7 @@
 - name: Stop pound
   service: name={{ pound_svc_name }} state=stopped enabled=yes
   when: _pound_installed
+  tags: [pound_build]
 
 - name: Uninstall the required packages in Debian derivatives
   apt:
@@ -18,8 +19,8 @@
     update_cache: yes
   with_items: "{{pound_pkgs}}"
   environment: "{{env}}"
-  when: ansible_os_family == 'Debian'
-
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: [pound_build]
 # - name: Change the location of the config file
 #   set_fact:
 #      pound_cfg_file: '/usr/etc/pound.cfg'
@@ -55,11 +56,11 @@
 - name: Install the required build packages
   apt:
     name: "{{ item }}"
-    state: installed
+    state: present
     update_cache: yes
   with_items: "{{pound_build_pkgs}}"
   environment: "{{env}}"
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   become: true
   tags: [pound_build]
 
@@ -71,49 +72,49 @@
 #   become: true
 #   tags: [pound_build]
 
-- block:
-    - name: Download Pound from source.
-      get_url:
-        url: "http://www.apsis.ch/pound/Pound-{{ pound_version }}.tgz"
-        dest: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
-    - name: Expand pound archive.
-      unarchive:
-        src: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
-        dest: "{{ build_workspace }}"
-        creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
-        copy: no
-  rescue:
-    - name: Manual | Get pound from github
-      git:
-        repo: "https://github.com/goochjj/pound.git"
-        dest: "{{ build_workspace }}/Pound-{{ pound_version }}"
-        version: "upstream/branch/v2.7"
-        accept_hostkey: "yes"
-        force: no
-        update: no
-        depth: 1
-    - debug: msg='Pound downloaded from Github'
-  become: true
-  tags: [pound_build]
-
-    # - name: Download Pound from github.
-    #   get_url:
-    #     url: "https://github.com/goochjj/pound/archive/upstream/branch/v{{ pound_version }}.zip"
-    #     dest: "{{ build_workspace }}/Pound-{{ pound_version }}.zip"
-    # - name: Expand pound archive.
-    #   unarchive:
-    #     src: "{{ build_workspace }}/Pound-{{ pound_version }}.zip"
-    #     dest: "{{ build_workspace }}"
-    #     creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
-    #     copy: no
-# - name: Expand pound archive.
-#   unarchive:
-#     src: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
-#     dest: "{{ build_workspace }}"
-#     creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
-#     copy: no
+# - block:
+#     - name: Download Pound from source.
+#       get_url:
+#         url: "http://www.apsis.ch/pound/Pound-{{ pound_version }}.tgz"
+#         dest: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+#     - name: Expand pound archive.
+#       unarchive:
+#         src: "{{ build_workspace }}/Pound-{{ pound_version }}.tgz"
+#         dest: "{{ build_workspace }}"
+#         creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
+#         copy: no
+#   rescue:
+#     - name: Manual | Get pound from github
+#       git:
+#         repo: "https://github.com/goochjj/pound.git"
+#         dest: "{{ build_workspace }}/Pound-{{ pound_version }}"
+#         version: "upstream/branch/v2.8a"
+#         accept_hostkey: "yes"
+#         force: no
+#         update: no
+#         depth: 1
+#     - debug: msg='Pound downloaded from Github'
 #   become: true
 #   tags: [pound_build]
+
+- block:
+    - name: Download Pound from github and expand
+      unarchive:
+        src: "https://github.com/graygnuorg/pound/archive/master.zip"
+        dest: "{{ build_workspace }}"
+        creates: "{{ build_workspace }}/pound-master/bootstrap"
+        remote_src: yes
+    - name: Rename unzipped folder
+      command: >
+         mv "{{ build_workspace }}/pound-master" "{{ build_workspace }}/Pound-{{ pound_version }}"
+    - name: Build prereq
+      command: >
+        ./bootstrap
+        chdir={{ build_workspace }}/Pound-{{ pound_version }}
+        creates: "{{ build_workspace }}/Pound-{{ pound_version }}/configure"
+        copy: no
+  become: true
+  tags: [pound_build]
 
 - name: Configure pound make
   command: >
