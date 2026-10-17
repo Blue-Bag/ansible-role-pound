@@ -33,6 +33,7 @@ pound_listen_http_address: '127.0.0.1'
 
 # What port should pound listen on?
 pound_listen_http_port: '80'
+pound_listen_https_port: 443;
 pound_internal_web: '8080'
 pound_internal_address: '127.0.0.1'
 
